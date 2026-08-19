@@ -31,6 +31,9 @@
     assert(source.includes("$$\nF\\in R^{d}\n$$"), "div text formula wrapping failed");
     assert(source.includes("Inline result $a+b$ stays in this sentence."), "inline KaTeX classification failed");
     assert(source.includes("$$\n\\int_0^1 x\\,dx\n$$"), "block KaTeX classification failed");
+    assert(source.includes("MathML shape $X\\in \\mathbb{R}^{C\\times H\\times W}$ remains inline."), "MathML inline recovery failed");
+    assert(source.includes("$$\nX_{c}\\in \\mathbb{R}^{H\\times W}\n$$"), "MathML subscript/display recovery failed");
+    assert(source.includes("$$\n\\boxed{\\text{feature map}\\approx \\text{intermediate activation}}\n$$"), "MathML text/box recovery failed");
     assert(source.includes("`rbf`") && source.includes("```python\nfrom sklearn.svm import SVC"), "code conversion failed");
     assert(source.includes("  - rbf"), "nested list indentation failed");
     assert(source.includes("| Model | Latency |\n| --- | ---: |"), "table conversion failed");
@@ -45,7 +48,7 @@
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     assert(laterMessage.querySelectorAll(".gptcopier-controls").length === 1, "dynamic button injection failed");
     laterMessage.remove();
-    status.textContent = "15 fixture checks passed";
+    status.textContent = "18 fixture checks passed";
     status.dataset.status = "pass";
   }
 

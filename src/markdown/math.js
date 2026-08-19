@@ -1,14 +1,103 @@
 (function (namespace) {
   "use strict";
 
+  function childTex(element) {
+    return Array.from(element.childNodes).map(mathMLToTex).join("");
+  }
+
+  function wrapCommand(command, value) {
+    return value ? `\\${command}{${value}}` : "";
+  }
+
+  function mathMLToTex(node) {
+    if (!node) return "";
+    if (node.nodeType === Node.TEXT_NODE) return node.nodeValue.trim() ? node.nodeValue.replace(/\s+/g, " ") : "";
+    if (node.nodeType !== Node.ELEMENT_NODE) return "";
+
+    const tag = node.localName.toLowerCase();
+    const children = Array.from(node.children);
+    const content = () => childTex(node);
+
+    if (tag === "annotation" || tag === "annotation-xml") return "";
+    if (tag === "semantics") {
+      return mathMLToTex(children.find((child) => !["annotation", "annotation-xml"].includes(child.localName.toLowerCase())));
+    }
+    if (["math", "mrow", "mstyle", "mpadded", "merror", "mphantom"].includes(tag)) return content();
+    if (tag === "mi") {
+      const value = node.textContent.trim();
+      const variant = node.getAttribute("mathvariant") || node.closest("mstyle[mathvariant]")?.getAttribute("mathvariant") || "";
+      if (variant === "double-struck") return wrapCommand("mathbb", value);
+      if (variant === "bold") return wrapCommand("mathbf", value);
+      if (variant === "bold-italic") return wrapCommand("boldsymbol", value);
+      if (variant === "normal") return wrapCommand("mathrm", value);
+      if (variant === "monospace") return wrapCommand("mathtt", value);
+      if (variant.includes("sans-serif")) return wrapCommand("mathsf", value);
+      return value.length > 1 ? wrapCommand("operatorname", value) : value;
+    }
+    if (tag === "mn") return node.textContent.trim();
+    if (tag === "mtext") {
+      const value = node.textContent.replace(/([{}])/g, "\\$1").trim();
+      return wrapCommand("text", value);
+    }
+    if (tag === "mo") {
+      const value = node.textContent.trim();
+      if (value === "\u2061") return "";
+      if (value === "\u2062") return "\\,";
+      if (value === "−") return "-";
+      return Object.prototype.hasOwnProperty.call(UNICODE_TEX, value) ? UNICODE_TEX[value] : value;
+    }
+    if (tag === "msup") return `${mathMLToTex(children[0])}^{${mathMLToTex(children[1])}}`;
+    if (tag === "msub") return `${mathMLToTex(children[0])}_{${mathMLToTex(children[1])}}`;
+    if (tag === "msubsup") return `${mathMLToTex(children[0])}_{${mathMLToTex(children[1])}}^{${mathMLToTex(children[2])}}`;
+    if (tag === "mfrac") return `\\frac{${mathMLToTex(children[0])}}{${mathMLToTex(children[1])}}`;
+    if (tag === "msqrt") return wrapCommand("sqrt", content());
+    if (tag === "mroot") return `\\sqrt[${mathMLToTex(children[1])}]{${mathMLToTex(children[0])}}`;
+    if (tag === "mfenced") {
+      const open = node.getAttribute("open") ?? "(";
+      const close = node.getAttribute("close") ?? ")";
+      return `\\left${open}${content()}\\right${close}`;
+    }
+    if (tag === "menclose") {
+      const notation = node.getAttribute("notation") || "";
+      return /box|roundedbox/.test(notation) ? wrapCommand("boxed", content()) : content();
+    }
+    if (tag === "mover") {
+      const base = mathMLToTex(children[0]);
+      const over = mathMLToTex(children[1]);
+      if (["¯", "―", "_"].includes(children[1]?.textContent.trim())) return wrapCommand("bar", base);
+      if (["→", "⃗"].includes(children[1]?.textContent.trim())) return wrapCommand("vec", base);
+      if (["^", "ˆ"].includes(children[1]?.textContent.trim())) return wrapCommand("hat", base);
+      return `\\overset{${over}}{${base}}`;
+    }
+    if (tag === "munder") return `\\underset{${mathMLToTex(children[1])}}{${mathMLToTex(children[0])}}`;
+    if (tag === "munderover") {
+      return `${mathMLToTex(children[0])}_{${mathMLToTex(children[1])}}^{${mathMLToTex(children[2])}}`;
+    }
+    if (tag === "mtable") {
+      const rows = children.map(mathMLToTex).join(" \\\\ ");
+      return `\\begin{matrix}${rows}\\end{matrix}`;
+    }
+    if (tag === "mtr") return children.map(mathMLToTex).join(" & ");
+    if (tag === "mtd") return content();
+    if (tag === "mspace") return "\\,";
+    return content();
+  }
+
   function texFrom(element) {
     const annotation = element.querySelector("annotation[encoding='application/x-tex'], annotation[encoding='text/x-tex']");
     if (annotation && annotation.textContent.trim()) return annotation.textContent.trim();
 
-    for (const attribute of ["data-tex", "data-latex", "data-math", "aria-label"]) {
+    for (const attribute of ["data-tex", "data-latex", "data-math"]) {
       const value = element.getAttribute && element.getAttribute(attribute);
       if (value && value.trim() && !/^\s*(math|formula)\s*$/i.test(value)) return value.trim();
     }
+
+    const math = element.matches?.("math") ? element : element.querySelector?.("math");
+    const mathMLTex = math ? mathMLToTex(math).replace(/\s{2,}/g, " ").trim() : "";
+    if (mathMLTex) return mathMLTex;
+
+    const ariaLabel = element.getAttribute && element.getAttribute("aria-label");
+    if (ariaLabel && ariaLabel.trim() && !/^\s*(math|formula)\s*$/i.test(ariaLabel)) return ariaLabel.trim();
     return null;
   }
 
@@ -60,6 +149,7 @@
     "∈": "\\in ", "∉": "\\notin ", "∋": "\\ni ", "×": "\\times ", "÷": "\\div ",
     "±": "\\pm ", "∑": "\\sum ", "∏": "\\prod ", "∫": "\\int ", "√": "\\sqrt{}",
     "∞": "\\infty", "≤": "\\le ", "≥": "\\ge ", "≠": "\\ne ", "≈": "\\approx ",
+    "→": "\\rightarrow ", "←": "\\leftarrow ", "↔": "\\leftrightarrow ", "⇒": "\\Rightarrow ",
     "α": "\\alpha ", "β": "\\beta ", "γ": "\\gamma ", "δ": "\\delta ", "θ": "\\theta ",
     "λ": "\\lambda ", "μ": "\\mu ", "π": "\\pi ", "σ": "\\sigma "
   };
@@ -105,5 +195,15 @@
     return wrapInlineFallback(value);
   }
 
-  namespace.math = { mathInfo, isMathElement, renderMath, formatTextMath, wrapInlineFallback, isStandaloneFormula };
+  namespace.math = {
+    mathInfo,
+    isMathElement,
+    renderMath,
+    formatTextMath,
+    wrapInlineFallback,
+    isStandaloneFormula,
+    isDisplayMath,
+    mathMLToTex,
+    normaliseFallbackTex
+  };
 }(window.GPTCopier));
