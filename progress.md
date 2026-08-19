@@ -94,6 +94,16 @@
 - 创建/修改的文件：
   - `src/markdown/math.js`、`src/content/ui.js`、`scripts/test-math.mjs`、`manifest.json`、`package.json`
 
+### 阶段 11：注入控件版本化自修复
+- **状态：** complete
+- 执行的操作：
+  - 将旧布尔初始化标记替换为与 Manifest 对齐的版本标记。
+  - 为回答复制、Q&A 复制、公式诊断增加三个稳定 action ID。
+  - 每次统一扫描校验控件版本、数量与 action 完整性，不一致时删除旧控件并重建监听器。
+  - 新增 Node UI 回归测试及离线页面级升级夹具，将版本提升为 `0.2.2`。
+- 创建/修改的文件：
+  - `src/content/ui.js`、`scripts/test-ui-version.mjs`、`demo/demo.js`、`manifest.json`、`package.json`、`README.md`
+
 ## 测试结果
 | 测试 | 输入 | 预期结果 | 实际结果 | 状态 |
 |------|------|---------|---------|------|
@@ -108,6 +118,8 @@
 | MathML 结构恢复 | 张量形状、通道下标、boxed 文本、视觉网络箭头链 | 保留 `\\mathbb`、上下标、`\\text`、`\\boxed` 与箭头 | 4 个代表公式全部通过 | 通过 |
 | 行内/块级分类 | 显式 inline/display 与纯公式/混合文本容器 | 正确选择 `$` 或 `$$` | 4 个分类用例全部通过 | 通过 |
 | 隐藏/属性公式源 | `data-latex` 与 screen-reader hidden TeX | 清理定界符并恢复原始 TeX | 2 个来源用例全部通过 | 通过 |
+| UI 跨版本升级 | 旧布尔标记、两个旧按钮 | 自动替换为 0.2.2 三个稳定 action | Node 测试与离线页面夹具通过 | 通过 |
+| UI 结构自修复 | 当前版本缺少 Math Debug、重复扫描 | 重建完整控件且始终只有一组 | 4 个 UI 自动化检查通过 | 通过 |
 
 ## 错误日志
 | 时间戳 | 错误 | 尝试次数 | 解决方案 |

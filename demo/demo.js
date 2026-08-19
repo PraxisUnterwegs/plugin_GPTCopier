@@ -6,6 +6,7 @@
   const user = document.querySelector("[data-message-author-role='user']");
   const output = document.querySelector("#output");
   const status = document.querySelector("#test-status");
+  let checks = 0;
 
   function answer() {
     return markdown.convert(sites.chatgpt.getContent(assistant));
@@ -17,6 +18,7 @@
 
   function assert(condition, message) {
     if (!condition) throw new Error(message);
+    checks += 1;
   }
 
   async function runFixtureChecks() {
@@ -41,6 +43,25 @@
     assert(source.includes("[scikit-learn](https://scikit-learn.org/)"), "link conversion failed");
     assert(ui.nearestQuestion(sites.chatgpt, assistant) === user, "Q&A message pairing failed");
     assert(document.querySelectorAll(".gptcopier-controls").length === 1, "button injection failed");
+
+    const originalControls = assistant.querySelector(".gptcopier-controls");
+    originalControls.setAttribute("data-gptcopier-version", "0.2.1");
+    originalControls.querySelector("[data-gptcopier-action='debug-math']").remove();
+    assistant.setAttribute("data-gptcopier-initialized", "true");
+    window.GPTCopier.instance.scan();
+    const upgradedControls = assistant.querySelector(".gptcopier-controls");
+    assert(upgradedControls !== originalControls, "stale control group was not rebuilt");
+    assert(assistant.getAttribute("data-gptcopier-initialized") === null, "legacy initialized marker was not removed");
+    assert(assistant.getAttribute("data-gptcopier-version") === ui.currentVersion, "message version was not upgraded");
+    assert(upgradedControls.querySelectorAll("[data-gptcopier-action]").length === 3, "upgraded controls do not contain three actions");
+
+    upgradedControls.querySelector("[data-gptcopier-action='debug-math']").remove();
+    window.GPTCopier.instance.scan();
+    const repairedControls = assistant.querySelector(".gptcopier-controls");
+    assert(repairedControls !== upgradedControls && repairedControls.querySelector("[data-gptcopier-action='debug-math']"), "incomplete current controls were not repaired");
+    window.GPTCopier.instance.scan();
+    assert(assistant.querySelectorAll(".gptcopier-controls").length === 1, "repeated scan duplicated controls");
+
     const laterMessage = document.createElement("article");
     laterMessage.setAttribute("data-message-author-role", "assistant");
     laterMessage.innerHTML = "<div data-message-content><p>Streaming complete.</p></div>";
@@ -48,13 +69,15 @@
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     assert(laterMessage.querySelectorAll(".gptcopier-controls").length === 1, "dynamic button injection failed");
     laterMessage.remove();
-    status.textContent = "18 fixture checks passed";
+    status.textContent = `${checks} fixture checks passed`;
     status.dataset.status = "pass";
   }
 
   document.addEventListener("click", (event) => {
     if (!event.target.classList.contains("gptcopier-button")) return;
-    output.textContent = event.target.textContent.startsWith("Copy Q") ? qa() : answer();
+    const action = event.target.getAttribute("data-gptcopier-action");
+    if (action === "copy-answer") output.textContent = answer();
+    if (action === "copy-qa") output.textContent = qa();
   }, true);
 
   runFixtureChecks().catch((error) => {

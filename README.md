@@ -1,6 +1,6 @@
 # GPTCopier
 
-一个零依赖的 Manifest V3 浏览器扩展。在 ChatGPT 的每条回答旁提供 `Copy MD` 和 `Copy Q&A MD`，复制的内容是可直接粘贴进 Obsidian、Typora 与 VS Code 的 Markdown 源码。
+一个零依赖的 Manifest V3 浏览器扩展。在 ChatGPT 的每条回答旁提供 `Copy MD`、`Copy Q&A MD` 和 `Math Debug`，复制的内容是可直接粘贴进 Obsidian、Typora 与 VS Code 的 Markdown 源码。
 
 ## 当前范围
 
@@ -14,7 +14,10 @@
 1. 打开 `chrome://extensions` 或 `edge://extensions`。
 2. 开启“开发者模式”。
 3. 选择“加载已解压的扩展程序”，并选择本项目根目录。
-4. 在目标站点任意对话中点击 `Copy MD` 或 `Copy Q&A MD`。
+4. 刷新已经打开的目标站点页面；每条回答旁应显示 `Copy MD`、`Copy Q&A MD`、`Math Debug` 三个按钮。
+5. 点击 `Copy MD` 或 `Copy Q&A MD` 复制 Markdown。
+
+从旧版本升级时，在扩展管理页点击一次“重新加载”，再刷新目标网页。自 `0.2.2` 起，每次页面扫描都会核对注入控件的版本与三个 action；旧按钮、缺失按钮或重复控件会自动删除并重建。
 
 ## 开发与验证
 

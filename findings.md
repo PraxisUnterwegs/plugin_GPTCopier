@@ -12,6 +12,7 @@
 - 用户明确指定 Manifest V3，Chrome/Edge 均使用 Chromium 扩展接口，能共享一份包。
 - 为避免访问真实 AI 账户，测试采用本地 HTTP 夹具，并复刻消息角色、Markdown、KaTeX、操作栏及动态页面所需的语义 DOM。
 - 用户截图确认 Edge 扩展已启用且显示版本 `0.2.0`，因此失败并非扩展未重载，而是线上公式 DOM 与夹具仍不一致。
+- Edge 后续显示 `0.2.1` 但页面仍只有两个旧按钮，证明扩展包更新与当前 SPA 页面中已经注入的 DOM/事件监听器是两个独立状态；布尔初始化标记会错误地阻止新版脚本接管。
 
 ## 技术决策
 | 决策 | 理由 |
@@ -25,6 +26,7 @@
 | 公式显示模式 | `.katex-display`、`MathJax_Display`、`data-display='block'` 等显式标志判断为块级；仅含公式的段落/块容器作为结构回退。 |
 | MathML 结构恢复 | 用户样例中的 `RC×H×W` 源于 MathML 被当作视觉文本展开；需读取 `msup`、`msub`、`mathvariant=double-struck`、`mtext` 与 `menclose`。 |
 | 公式源发现扩展 | 除 annotation/MathML 外，还需检查后代 `data-tex/data-latex/data-math`、aria label、screen-reader hidden source 与 MathJax 容器。 |
+| 版本化 UI 完整性校验 | assistant 消息与控件组都记录 Manifest 版本，并要求三个稳定 action 各出现一次；不符合即整体重建，避免复用旧监听器。 |
 
 ## 遇到的问题
 | 问题 | 解决方案 |
@@ -35,6 +37,7 @@
 | 公式作为普通文本时无 `$` / `$$` | 对明确数学符号、TeX 记号和 `sup/sub` 结构提供保守补全。 |
 | Edge 自动化不可用 | 当前环境没有连接可操作的 Edge 实例，不能读取用户浏览器中的已安装扩展；不会因此登录或访问账户。 |
 | TeX 命令边界 | MathML 初版转换生成 `\\timesH`；运算符命令必须保留尾随空格，避免被解析成不存在的长命令。 |
+| 旧按钮跨版本残留 | `data-gptcopier-initialized="true"` 无法表达代码版本；改用 `data-gptcopier-version` 并在启动/MutationObserver 共用的 scan 中执行升级。 |
 
 ## 资源
 - 需求原文：`/Users/jzf/.codex/attachments/034c5dc6-68aa-4f01-a58d-333f69987ade/pasted-text.txt`
