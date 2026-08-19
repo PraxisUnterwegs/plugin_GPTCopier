@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GPTCopier — Paste & Convert</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <div class="brand-mark" aria-hidden="true">G</div>
+        <div>
+          <div class="eyebrow">GPTCOPIER <span id="version"></span></div>
+          <h1>Paste &amp; Convert</h1>
+          <p>Paste a response copied with the AI website’s own copy button. Formula delimiters are normalized locally into Markdown.</p>
+        </div>
+      </header>
+
+      <section class="workspace" aria-labelledby="input-label">
+        <div class="section-heading">
+          <div>
+            <label id="input-label" for="source-input">Native copied text</label>
+            <p>Your input stays in this tab’s memory and disappears when the page closes or reloads.</p>
+          </div>
+          <button id="clear-input" class="button button--quiet" type="button" disabled>Clear</button>
+        </div>
+        <textarea id="source-input" spellcheck="false" placeholder="Paste the response here…" aria-describedby="conversion-status conversion-warnings"></textarea>
+        <div class="result-bar">
+          <div class="result-copy">
+            <strong id="conversion-status" aria-live="polite">Converted 0 formulas (0 block / 0 inline)</strong>
+            <span>Code spans, code fences, and existing $ math stay unchanged.</span>
+          </div>
+          <button id="copy-output" class="button button--primary" type="button" disabled>Copy converted Markdown</button>
+        </div>
+        <ul id="conversion-warnings" class="warnings" hidden aria-live="polite"></ul>
+      </section>
+
+      <footer>No page access · No automatic clipboard reading · No storage · No network requests</footer>
+    </main>
+    <script src="convert.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

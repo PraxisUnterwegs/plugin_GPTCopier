@@ -1,8 +1,8 @@
 {
   "name": "gptcopier",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
-    "test": "node scripts/check-syntax.mjs && node scripts/test-math.mjs && node scripts/test-ui-version.mjs"
+    "test": "node scripts/check-syntax.mjs && node scripts/test-converter.mjs && node scripts/test-manifest.mjs"
   }
 }

@@ -3,80 +3,40 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>GPTCopier — Offline demo</title>
-    <link rel="stylesheet" href="demo.css">
-    <link rel="stylesheet" href="../src/content/styles.css">
+    <title>GPTCopier 0.3.0 — Offline Demo</title>
+    <link rel="stylesheet" href="../src/converter/styles.css">
   </head>
   <body>
     <main class="shell">
-      <header>
-        <span class="badge">OFFLINE FIXTURE</span>
-        <h1>GPTCopier</h1>
-        <p>ChatGPT-style local conversation. No account or remote service is used.</p>
+      <header class="hero">
+        <div class="brand-mark" aria-hidden="true">G</div>
+        <div>
+          <div class="eyebrow">GPTCOPIER <span id="version"></span></div>
+          <h1>Paste &amp; Convert</h1>
+          <p>Offline fixture for the extension page. No account, AI website, or remote service is used.</p>
+        </div>
       </header>
-
-      <section class="conversation" aria-label="Demo conversation">
-        <article class="turn user" data-message-author-role="user">
-          <div class="avatar">You</div>
-          <div class="message" data-message-content>
-            <p>Explain a kernel model with a formula, code sample, and a comparison table.</p>
+      <section class="workspace" aria-labelledby="input-label">
+        <div class="section-heading">
+          <div>
+            <label id="input-label" for="source-input">Native copied text</label>
+            <p>Paste or edit text below. Only formula delimiters are normalized.</p>
           </div>
-        </article>
-
-        <article class="turn assistant" data-message-author-role="assistant">
-          <div class="avatar">AI</div>
-          <div class="message markdown" data-message-content>
-            <h2>Kernel model</h2>
-            <p>A kernel model measures <strong>similarity</strong> while preserving <em>non-linear</em> structure.</p>
-            <p>Tensor shape: X∈R<sup>C×H×W</sup>.</p>
-            <p>x<sup>2</sup> + y<sup>2</sup> = z<sup>2</sup></p>
-            <div class="plain-formula">F∈R<sup>d</sup></div>
-            <p>Inline result <span class="katex"><math><semantics><annotation encoding="application/x-tex">a+b</annotation></semantics></math><span aria-hidden="true">a + b</span></span> stays in this sentence.</p>
-            <div class="plain-formula"><span class="katex"><math><semantics><annotation encoding="application/x-tex">\int_0^1 x\,dx</annotation></semantics></math><span aria-hidden="true">∫₀¹x dx</span></span></div>
-            <p>MathML shape <span class="math-inline"><math><mi>X</mi><mo>∈</mo><msup><mi mathvariant="double-struck">R</mi><mrow><mi>C</mi><mo>×</mo><mi>H</mi><mo>×</mo><mi>W</mi></mrow></msup></math></span> remains inline.</p>
-            <div class="math-display"><math display="block"><msub><mi>X</mi><mi>c</mi></msub><mo>∈</mo><msup><mi mathvariant="double-struck">R</mi><mrow><mi>H</mi><mo>×</mo><mi>W</mi></mrow></msup></math></div>
-            <div class="math-display"><math display="block"><menclose notation="box"><mrow><mtext>feature map</mtext><mo>≈</mo><mtext>intermediate activation</mtext></mrow></menclose></math></div>
-            <div class="katex-display">
-              <span class="katex"><math><semantics><annotation encoding="application/x-tex">z=\sum_i \alpha_i K(x,x_i)</annotation></semantics></math><span aria-hidden="true">z = Σ αᵢK(x,xᵢ)</span></span>
-            </div>
-            <p>Use <code>rbf</code> when the relationship is smooth:</p>
-            <pre><code class="language-python">from sklearn.svm import SVC
-model = SVC(kernel="rbf")</code></pre>
-            <ul>
-              <li>Fast baseline</li>
-              <li>Useful options
-                <ul><li>linear</li><li>rbf</li></ul>
-              </li>
-            </ul>
-            <table>
-              <thead><tr><th>Model</th><th align="right">Latency</th></tr></thead>
-              <tbody><tr><td><strong>RBF</strong></td><td>50 ms</td></tr><tr><td>Linear</td><td>12 ms</td></tr></tbody>
-            </table>
-            <blockquote><p>Validate on a held-out set.</p></blockquote>
-            <p>See <a href="https://scikit-learn.org/">scikit-learn</a> for details.</p>
-            <hr>
+          <button id="clear-input" class="button button--quiet" type="button" disabled>Clear</button>
+        </div>
+        <textarea id="source-input" spellcheck="false" placeholder="Paste the response here…" aria-describedby="conversion-status conversion-warnings"></textarea>
+        <div class="result-bar">
+          <div class="result-copy">
+            <strong id="conversion-status" aria-live="polite">Converted 0 formulas (0 block / 0 inline)</strong>
+            <span>Code spans, code fences, and existing $ math stay unchanged.</span>
           </div>
-          <div role="toolbar" class="native-actions"><button type="button">Copy</button><button type="button">Good response</button></div>
-        </article>
+          <button id="copy-output" class="button button--primary" type="button" disabled>Copy converted Markdown</button>
+        </div>
+        <ul id="conversion-warnings" class="warnings" hidden aria-live="polite"></ul>
       </section>
-
-      <section class="result-panel">
-        <div class="result-header"><h2>Copied Markdown preview</h2><span id="test-status">Running fixture checks…</span></div>
-        <pre id="output" aria-live="polite">Click “Copy Q&amp;A MD” above to preview the exact source.</pre>
-      </section>
+      <footer>Offline demo · No page access · No storage · No network requests</footer>
     </main>
-
-    <script src="../src/shared/namespace.js"></script>
-    <script src="../src/sites/adapters.js"></script>
-    <script src="../src/markdown/cleanup.js"></script>
-    <script src="../src/markdown/math.js?v=6"></script>
-    <script src="../src/markdown/table.js"></script>
-    <script src="../src/markdown/convert.js?v=5"></script>
-    <script src="../src/utils/clipboard.js"></script>
-    <script src="../src/content/ui.js"></script>
-    <script src="../src/content/observer.js"></script>
-    <script>window.GPTCopier.demoAdapter = window.GPTCopier.sites.chatgpt;</script>
-    <script src="../src/content/index.js"></script>
-    <script src="demo.js?v=4"></script>
+    <script src="../src/converter/convert.js"></script>
+    <script src="../src/converter/app.js"></script>
   </body>
 </html>
