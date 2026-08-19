@@ -1,0 +1,34 @@
+# 发现与决策
+
+## 需求
+- 首发目标：ChatGPT 网页的每条 assistant 消息提供“Copy MD”与“Copy Q&A MD”。
+- 复制结果必须是 Markdown 源码，并覆盖标题、粗斜体、行内/块代码、LaTeX、列表、表格、链接、引用和分隔线。
+- SPA 页面需持续监听变化，且 Q&A 需回溯最近的 user 消息。
+- DeepSeek 与 Gemini 暂不要求现在完整启用，但架构必须预留扩展空间。
+- 需要本地测试与演示；用户审阅 demo 后再执行真实浏览器安装测试。
+
+## 研究发现
+- 项目目录初始为空，尚未存在用户代码或 Git 历史。
+- 用户明确指定 Manifest V3，Chrome/Edge 均使用 Chromium 扩展接口，能共享一份包。
+- 为避免访问真实 AI 账户，测试采用本地 HTTP 夹具，并复刻消息角色、Markdown、KaTeX、操作栏及动态页面所需的语义 DOM。
+
+## 技术决策
+| 决策 | 理由 |
+|------|------|
+| 原生 DOM walker | 对 KaTeX、代码块和 UI 排除可实现精细控制，避免默认 HTML 转 Markdown 库破坏结构。 |
+| `SiteAdapter` 合约 | 使站点选择器和消息/动作区域发现可各自演进。 |
+| CSS 使用自有 class 与低侵入布局 | 不依赖目标站随机 class，减少对原 UI 的影响。 |
+| 以 classic content scripts 依序加载模块 | Manifest V3 content script 不需要额外 bundler 也能以共享命名空间维持职责分层。 |
+
+## 遇到的问题
+| 问题 | 解决方案 |
+|------|---------|
+| 初始化 Git 仓库时默认沙箱拒绝 `.git` 写入 | 获授权后完成 `git init`。 |
+| 嵌套列表转换时报 `list is not a function` | 递归函数参数与函数同名，已改为 `listElement`。 |
+| 代码布局空白节点被写入 Markdown | 忽略纯空白文本节点，确保复制源码无缩进噪声。 |
+
+## 资源
+- 需求原文：`/Users/jzf/.codex/attachments/034c5dc6-68aa-4f01-a58d-333f69987ade/pasted-text.txt`
+
+## 视觉/浏览器发现
+- 离线夹具已通过 10 项检查。点击 `Copy Q&A MD` 后显示 `Copied!` 并展示生成的 Q&A Markdown；该验证没有访问任何线上账户。

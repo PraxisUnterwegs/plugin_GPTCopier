@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GPTCopier — Offline demo</title>
+    <link rel="stylesheet" href="demo.css">
+    <link rel="stylesheet" href="../src/content/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <span class="badge">OFFLINE FIXTURE</span>
+        <h1>GPTCopier</h1>
+        <p>ChatGPT-style local conversation. No account or remote service is used.</p>
+      </header>
+
+      <section class="conversation" aria-label="Demo conversation">
+        <article class="turn user" data-message-author-role="user">
+          <div class="avatar">You</div>
+          <div class="message" data-message-content>
+            <p>Explain a kernel model with a formula, code sample, and a comparison table.</p>
+          </div>
+        </article>
+
+        <article class="turn assistant" data-message-author-role="assistant">
+          <div class="avatar">AI</div>
+          <div class="message markdown" data-message-content>
+            <h2>Kernel model</h2>
+            <p>A kernel model measures <strong>similarity</strong> while preserving <em>non-linear</em> structure.</p>
+            <div class="katex-display">
+              <span class="katex"><math><semantics><annotation encoding="application/x-tex">z=\sum_i \alpha_i K(x,x_i)</annotation></semantics></math><span aria-hidden="true">z = Σ αᵢK(x,xᵢ)</span></span>
+            </div>
+            <p>Use <code>rbf</code> when the relationship is smooth:</p>
+            <pre><code class="language-python">from sklearn.svm import SVC
+model = SVC(kernel="rbf")</code></pre>
+            <ul>
+              <li>Fast baseline</li>
+              <li>Useful options
+                <ul><li>linear</li><li>rbf</li></ul>
+              </li>
+            </ul>
+            <table>
+              <thead><tr><th>Model</th><th align="right">Latency</th></tr></thead>
+              <tbody><tr><td><strong>RBF</strong></td><td>50 ms</td></tr><tr><td>Linear</td><td>12 ms</td></tr></tbody>
+            </table>
+            <blockquote><p>Validate on a held-out set.</p></blockquote>
+            <p>See <a href="https://scikit-learn.org/">scikit-learn</a> for details.</p>
+            <hr>
+          </div>
+          <div role="toolbar" class="native-actions"><button type="button">Copy</button><button type="button">Good response</button></div>
+        </article>
+      </section>
+
+      <section class="result-panel">
+        <div class="result-header"><h2>Copied Markdown preview</h2><span id="test-status">Running fixture checks…</span></div>
+        <pre id="output" aria-live="polite">Click “Copy Q&amp;A MD” above to preview the exact source.</pre>
+      </section>
+    </main>
+
+    <script src="../src/shared/namespace.js"></script>
+    <script src="../src/sites/adapters.js"></script>
+    <script src="../src/markdown/cleanup.js"></script>
+    <script src="../src/markdown/math.js"></script>
+    <script src="../src/markdown/table.js"></script>
+    <script src="../src/markdown/convert.js?v=4"></script>
+    <script src="../src/utils/clipboard.js"></script>
+    <script src="../src/content/ui.js"></script>
+    <script src="../src/content/observer.js"></script>
+    <script>window.GPTCopier.demoAdapter = window.GPTCopier.sites.chatgpt;</script>
+    <script src="../src/content/index.js"></script>
+    <script src="demo.js?v=2"></script>
+  </body>
+</html>

@@ -1,0 +1,34 @@
+:root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #0d1117; color: #e6edf3; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 760px; }
+.shell { width: min(1080px, calc(100vw - 48px)); margin: 0 auto; padding: 48px 0 64px; }
+header { margin-bottom: 30px; }
+.badge { border: 1px solid #238636; color: #3fb950; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .1em; padding: 5px 9px; }
+h1 { font-size: 38px; margin: 14px 0 4px; letter-spacing: -.04em; }
+header p { color: #8b949e; margin: 0; }
+.conversation, .result-panel { background: #161b22; border: 1px solid #30363d; border-radius: 12px; overflow: hidden; }
+.turn { display: grid; grid-template-columns: 50px minmax(0, 1fr); gap: 14px; padding: 24px 28px; border-bottom: 1px solid #30363d; }
+.turn:last-child { border-bottom: 0; }
+.turn.user { background: #0d1117; }
+.avatar { align-items: center; background: #1f6feb; border-radius: 50%; display: flex; font-size: 11px; font-weight: 700; height: 32px; justify-content: center; width: 32px; }
+.assistant .avatar { background: #238636; }
+.message { line-height: 1.65; }
+.message h2 { margin-top: 0; }
+.message p { margin: 0 0 13px; }
+.message pre { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; overflow: auto; padding: 13px; }
+.message code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.message p code { background: #30363d; border-radius: 4px; padding: 2px 5px; }
+.message table { border-collapse: collapse; margin: 14px 0; width: min(480px, 100%); }
+.message th, .message td { border: 1px solid #30363d; padding: 6px 10px; text-align: left; }
+.message blockquote { border-left: 3px solid #3fb950; color: #8b949e; margin: 14px 0; padding-left: 12px; }
+.katex-display { background: #0d1117; border-radius: 7px; color: #a5d6ff; font-family: ui-monospace, monospace; margin: 14px 0; padding: 12px; }
+.native-actions { align-items: center; display: flex; gap: 6px; margin-top: 13px; }
+.native-actions > button { background: transparent; border: 0; color: #8b949e; cursor: pointer; font-size: 12px; padding: 4px; }
+.result-panel { margin-top: 26px; }
+.result-header { align-items: center; border-bottom: 1px solid #30363d; display: flex; justify-content: space-between; padding: 13px 20px; }
+.result-header h2 { font-size: 15px; margin: 0; }
+#test-status { color: #8b949e; font-size: 12px; }
+#test-status[data-status="pass"] { color: #3fb950; }
+#test-status[data-status="fail"] { color: #f85149; }
+#output { color: #c9d1d9; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; margin: 0; min-height: 100px; overflow: auto; padding: 20px; white-space: pre-wrap; }
+.gptcopier-button { font-family: inherit; }

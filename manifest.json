@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "GPTCopier — Markdown Copy",
+  "version": "0.1.0",
+  "description": "Copy a single answer or a Q&A round as Markdown source.",
+  "permissions": ["clipboardWrite"],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.deepseek.com/*",
+        "https://gemini.google.com/*"
+      ],
+      "js": [
+        "src/shared/namespace.js",
+        "src/sites/adapters.js",
+        "src/markdown/cleanup.js",
+        "src/markdown/math.js",
+        "src/markdown/table.js",
+        "src/markdown/convert.js",
+        "src/utils/clipboard.js",
+        "src/content/ui.js",
+        "src/content/observer.js",
+        "src/content/index.js"
+      ],
+      "css": ["src/content/styles.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
