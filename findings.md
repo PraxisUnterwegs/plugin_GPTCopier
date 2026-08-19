@@ -20,6 +20,7 @@
 | CSS 使用自有 class 与低侵入布局 | 不依赖目标站随机 class，减少对原 UI 的影响。 |
 | 以 classic content scripts 依序加载模块 | Manifest V3 content script 不需要额外 bundler 也能以共享命名空间维持职责分层。 |
 | 公式文本回退 | 当网页未暴露 KaTeX/MathML 原始 TeX 时，带有明确数学信号的句内公式补 `$…$`，纯公式段落补 `$$…$$`；原始 TeX 的优先级更高。 |
+| 文本容器一致处理 | 公式可能不在 `<p>` 内；`div`、列表以及根文本节点都必须应用同一个回退规则。 |
 
 ## 遇到的问题
 | 问题 | 解决方案 |
@@ -28,6 +29,7 @@
 | 嵌套列表转换时报 `list is not a function` | 递归函数参数与函数同名，已改为 `listElement`。 |
 | 代码布局空白节点被写入 Markdown | 忽略纯空白文本节点，确保复制源码无缩进噪声。 |
 | 公式作为普通文本时无 `$` / `$$` | 对明确数学符号、TeX 记号和 `sup/sub` 结构提供保守补全。 |
+| Edge 自动化不可用 | 当前环境没有连接可操作的 Edge 实例，不能读取用户浏览器中的已安装扩展；不会因此登录或访问账户。 |
 
 ## 资源
 - 需求原文：`/Users/jzf/.codex/attachments/034c5dc6-68aa-4f01-a58d-333f69987ade/pasted-text.txt`

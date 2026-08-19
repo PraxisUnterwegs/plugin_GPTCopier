@@ -72,7 +72,12 @@
     }
 
     function block(node) {
-      if (node.nodeType === Node.TEXT_NODE) return text(node);
+      if (node.nodeType === Node.TEXT_NODE) {
+        const value = text(node);
+        return namespace.math.isStandaloneFormula(value)
+          ? namespace.math.formatTextMath(value)
+          : namespace.math.wrapInlineFallback(value);
+      }
       if (node.nodeType !== Node.ELEMENT_NODE) return "";
       const math = namespace.math.mathInfo(node);
       if (math && namespace.math.isMathElement(node)) return namespace.math.renderMath(math);
@@ -95,9 +100,11 @@
       if (["DIV", "SECTION", "ARTICLE", "MAIN"].includes(tag)) {
         const children = Array.from(node.childNodes);
         const hasBlockChild = children.some((child) => child.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has(child.tagName));
-        return hasBlockChild ? children.map(block).join("") : `${inline(node).trim()}\n\n`;
+        return hasBlockChild
+          ? children.map(block).join("")
+          : `${namespace.math.formatTextMath(inline(node).trim())}\n\n`;
       }
-      return inline(node);
+      return namespace.math.wrapInlineFallback(inline(node));
     }
 
     return namespace.cleanup.cleanMarkdown(Array.from(root.childNodes).map(block).join(""));
