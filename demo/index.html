@@ -28,6 +28,8 @@
           <div class="message markdown" data-message-content>
             <h2>Kernel model</h2>
             <p>A kernel model measures <strong>similarity</strong> while preserving <em>non-linear</em> structure.</p>
+            <p>Tensor shape: X∈R<sup>C×H×W</sup>.</p>
+            <p>x<sup>2</sup> + y<sup>2</sup> = z<sup>2</sup></p>
             <div class="katex-display">
               <span class="katex"><math><semantics><annotation encoding="application/x-tex">z=\sum_i \alpha_i K(x,x_i)</annotation></semantics></math><span aria-hidden="true">z = Σ αᵢK(x,xᵢ)</span></span>
             </div>
@@ -61,7 +63,7 @@ model = SVC(kernel="rbf")</code></pre>
     <script src="../src/shared/namespace.js"></script>
     <script src="../src/sites/adapters.js"></script>
     <script src="../src/markdown/cleanup.js"></script>
-    <script src="../src/markdown/math.js"></script>
+    <script src="../src/markdown/math.js?v=3"></script>
     <script src="../src/markdown/table.js"></script>
     <script src="../src/markdown/convert.js?v=4"></script>
     <script src="../src/utils/clipboard.js"></script>
@@ -69,6 +71,6 @@ model = SVC(kernel="rbf")</code></pre>
     <script src="../src/content/observer.js"></script>
     <script>window.GPTCopier.demoAdapter = window.GPTCopier.sites.chatgpt;</script>
     <script src="../src/content/index.js"></script>
-    <script src="demo.js?v=2"></script>
+    <script src="demo.js?v=3"></script>
   </body>
 </html>

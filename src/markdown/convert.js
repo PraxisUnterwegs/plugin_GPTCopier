@@ -38,6 +38,8 @@
         return `${delimiter}${value}${delimiter}`;
       }
       const content = Array.from(node.childNodes).map(inline).join("");
+      if (tag === "SUP") return content.trim() ? `^{${content.trim()}}` : "";
+      if (tag === "SUB") return content.trim() ? `_{${content.trim()}}` : "";
       if (tag === "STRONG" || tag === "B") return content.trim() ? `**${content.trim()}**` : "";
       if (tag === "EM" || tag === "I") return content.trim() ? `*${content.trim()}*` : "";
       if (tag === "A") {
@@ -89,7 +91,7 @@
         return `\n\n${body.split("\n").map((line) => `> ${line}`.trimEnd()).join("\n")}\n\n`;
       }
       if (tag === "HR") return "\n\n---\n\n";
-      if (tag === "P") return `${inline(node).trim()}\n\n`;
+      if (tag === "P") return `${namespace.math.formatTextMath(inline(node).trim())}\n\n`;
       if (["DIV", "SECTION", "ARTICLE", "MAIN"].includes(tag)) {
         const children = Array.from(node.childNodes);
         const hasBlockChild = children.some((child) => child.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has(child.tagName));

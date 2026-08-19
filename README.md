@@ -6,7 +6,7 @@
 
 - 已启用：ChatGPT（`chatgpt.com`）
 - 已预留适配器：DeepSeek（`chat.deepseek.com`）、Gemini（`gemini.google.com`）
-- 支持：标题、粗斜体、行内/块代码、KaTeX 原始 TeX、列表、表格、链接、引用、分隔线、图片
+- 支持：标题、粗斜体、行内/块代码、KaTeX 原始 TeX、文本形式公式的保守 `$`/`$$` 补全、列表、表格、链接、引用、分隔线、图片
 - 不读取账户、会话记录、Cookie 或网络请求；只在用户点击复制按钮时转换当前 DOM 中的消息。
 
 ## 本地加载（在 demo 确认后执行）

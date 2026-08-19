@@ -26,6 +26,8 @@
     assert(source.includes("**similarity**") && source.includes("*non-linear*"), "inline emphasis conversion failed");
     assert(source.includes("$$\nz=\\sum_i \\alpha_i K(x,x_i)\n$$"), "KaTeX source extraction failed");
     assert((source.match(/\\sum_i/g) || []).length === 1, "formula was duplicated");
+    assert(source.includes("Tensor shape: $X∈R^{C×H×W}$"), "inline text formula wrapping failed");
+    assert(source.includes("$$\nx^{2} + y^{2} = z^{2}\n$$"), "block text formula wrapping failed");
     assert(source.includes("`rbf`") && source.includes("```python\nfrom sklearn.svm import SVC"), "code conversion failed");
     assert(source.includes("  - rbf"), "nested list indentation failed");
     assert(source.includes("| Model | Latency |\n| --- | ---: |"), "table conversion failed");
@@ -40,7 +42,7 @@
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     assert(laterMessage.querySelectorAll(".gptcopier-controls").length === 1, "dynamic button injection failed");
     laterMessage.remove();
-    status.textContent = "10 fixture checks passed";
+    status.textContent = "12 fixture checks passed";
     status.dataset.status = "pass";
   }
 
