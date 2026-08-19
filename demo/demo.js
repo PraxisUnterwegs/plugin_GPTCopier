@@ -26,7 +26,7 @@
     assert(source.includes("**similarity**") && source.includes("*non-linear*"), "inline emphasis conversion failed");
     assert(source.includes("$$\nz=\\sum_i \\alpha_i K(x,x_i)\n$$"), "KaTeX source extraction failed");
     assert((source.match(/\\sum_i/g) || []).length === 1, "formula was duplicated");
-    assert(source.includes("Tensor shape: $X∈R^{C×H×W}$"), "inline text formula wrapping failed");
+    assert(source.includes("Tensor shape: $X\\in R^{C\\times H\\times W}$"), "inline text formula wrapping failed");
     assert(source.includes("$$\nx^{2} + y^{2} = z^{2}\n$$"), "block text formula wrapping failed");
     assert(source.includes("`rbf`") && source.includes("```python\nfrom sklearn.svm import SVC"), "code conversion failed");
     assert(source.includes("  - rbf"), "nested list indentation failed");

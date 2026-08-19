@@ -42,6 +42,20 @@
     `[A-Za-zα-ωΑ-Ω][A-Za-z0-9α-ωΑ-Ω]*\\s*(?:[∈∉∋×÷±∑∏∫√≤≥≠≈≃∂∇]|\\\\(?:alpha|beta|gamma|delta|epsilon|theta|lambda|mu|pi|sigma|sum|prod|int|frac|sqrt|cdot|times|in|mathbb)\\b)[${FORMULA_CHARS}]*`,
     "gu"
   );
+  const UNICODE_TEX = {
+    "∈": "\\in ", "∉": "\\notin ", "∋": "\\ni ", "×": "\\times ", "÷": "\\div ",
+    "±": "\\pm ", "∑": "\\sum ", "∏": "\\prod ", "∫": "\\int ", "√": "\\sqrt{}",
+    "∞": "\\infty", "≤": "\\le ", "≥": "\\ge ", "≠": "\\ne ", "≈": "\\approx ",
+    "α": "\\alpha ", "β": "\\beta ", "γ": "\\gamma ", "δ": "\\delta ", "θ": "\\theta ",
+    "λ": "\\lambda ", "μ": "\\mu ", "π": "\\pi ", "σ": "\\sigma "
+  };
+
+  function normaliseFallbackTex(value) {
+    return Object.entries(UNICODE_TEX).reduce((result, [symbol, tex]) => result.split(symbol).join(tex), value)
+      .replace(/\\sqrt\{\}\s*([A-Za-z0-9])/g, "\\sqrt{$1}")
+      .replace(/[ \t]{2,}/g, " ")
+      .trim();
+  }
 
   function isLikelyFormula(value) {
     const candidate = value.trim();
@@ -65,7 +79,7 @@
         const trimmed = candidate.trim();
         if (!isLikelyFormula(trimmed)) return candidate;
         const punctuation = trimmed.match(/[.,:;!?]+$/u)?.[0] || "";
-        const formula = punctuation ? trimmed.slice(0, -punctuation.length) : trimmed;
+        const formula = normaliseFallbackTex(punctuation ? trimmed.slice(0, -punctuation.length) : trimmed);
         return candidate.replace(trimmed, `$${formula}$${punctuation}`);
       });
     }).join("");
@@ -73,7 +87,7 @@
 
   function formatTextMath(value) {
     const candidate = value.trim();
-    if (isStandaloneFormula(candidate)) return `\n\n$$\n${candidate}\n$$\n\n`;
+    if (isStandaloneFormula(candidate)) return `\n\n$$\n${normaliseFallbackTex(candidate)}\n$$\n\n`;
     return wrapInlineFallback(value);
   }
 
