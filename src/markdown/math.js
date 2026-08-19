@@ -12,6 +12,20 @@
     return null;
   }
 
+  function formulaOnlyContent(container) {
+    const clone = container.cloneNode(true);
+    clone.querySelectorAll(".katex, .katex-display, math, .MathJax, .MathJax_Display").forEach((node) => node.remove());
+    return !clone.textContent.trim();
+  }
+
+  function isDisplayMath(target) {
+    if (target.closest("[data-display='inline'], .math-inline, .katex-inline")) return false;
+    if (target.closest(".katex-display, .MathJax_Display, .math-display, [data-display='block'], math[display='block']")) return true;
+
+    const container = target.closest("p, div, figure, section, article, li");
+    return Boolean(container && !container.matches("li") && formulaOnlyContent(container));
+  }
+
   function mathInfo(element) {
     const katex = element.matches && element.matches(".katex, .katex-display")
       ? element
@@ -19,7 +33,7 @@
     const target = katex || element;
     const tex = texFrom(target);
     if (!tex) return null;
-    const display = Boolean(target.closest && target.closest(".katex-display, [data-display='block']")) || target.matches(".katex-display, math[display='block']");
+    const display = isDisplayMath(target);
     return { tex, display };
   }
 

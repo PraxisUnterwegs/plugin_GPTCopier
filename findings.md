@@ -21,6 +21,7 @@
 | 以 classic content scripts 依序加载模块 | Manifest V3 content script 不需要额外 bundler 也能以共享命名空间维持职责分层。 |
 | 公式文本回退 | 当网页未暴露 KaTeX/MathML 原始 TeX 时，带有明确数学信号的句内公式补 `$…$`，纯公式段落补 `$$…$$`；原始 TeX 的优先级更高。 |
 | 文本容器一致处理 | 公式可能不在 `<p>` 内；`div`、列表以及根文本节点都必须应用同一个回退规则。 |
+| 公式显示模式 | `.katex-display`、`MathJax_Display`、`data-display='block'` 等显式标志判断为块级；仅含公式的段落/块容器作为结构回退。 |
 
 ## 遇到的问题
 | 问题 | 解决方案 |
