@@ -84,6 +84,16 @@
 - 创建/修改的文件：
   - `src/markdown/math.js`、`scripts/test-math.mjs`、`demo/`、`manifest.json`、`package.json`
 
+### 阶段 10：Edge 真实 DOM 诊断
+- **状态：** complete
+- 执行的操作：
+  - 根据用户截图确认 `0.2.0` 已加载，排除旧内容脚本缓存假设。
+  - 扩展后代 data 属性、aria、screen-reader hidden TeX 与 MathJax 容器识别。
+  - 新增用户主动触发的 `Math Debug`，报告公式候选结构但不自动发送。
+  - 增加 2 个隐藏/属性公式源测试，将版本提升为 `0.2.1`。
+- 创建/修改的文件：
+  - `src/markdown/math.js`、`src/content/ui.js`、`scripts/test-math.mjs`、`manifest.json`、`package.json`
+
 ## 测试结果
 | 测试 | 输入 | 预期结果 | 实际结果 | 状态 |
 |------|------|---------|---------|------|
@@ -97,6 +107,7 @@
 | 容器公式回退 | 纯 `div` 中的 `F∈R^d` | 输出标准 `$$F\\in R^{d}$$` | 夹具断言已加入；Edge 自动化不可用 | 部分通过 |
 | MathML 结构恢复 | 张量形状、通道下标、boxed 文本、视觉网络箭头链 | 保留 `\\mathbb`、上下标、`\\text`、`\\boxed` 与箭头 | 4 个代表公式全部通过 | 通过 |
 | 行内/块级分类 | 显式 inline/display 与纯公式/混合文本容器 | 正确选择 `$` 或 `$$` | 4 个分类用例全部通过 | 通过 |
+| 隐藏/属性公式源 | `data-latex` 与 screen-reader hidden TeX | 清理定界符并恢复原始 TeX | 2 个来源用例全部通过 | 通过 |
 
 ## 错误日志
 | 时间戳 | 错误 | 尝试次数 | 解决方案 |

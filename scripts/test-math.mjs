@@ -36,7 +36,7 @@ class FakeElement {
 
 const el = (name, attributes, ...children) => new FakeElement(name, attributes, children);
 const plain = (name, ...children) => el(name, {}, ...children);
-const { isDisplayMath, mathMLToTex } = window.GPTCopier.math;
+const { isDisplayMath, mathMLToTex, texFrom } = window.GPTCopier.math;
 
 function assertEqual(actual, expected, label) {
   if (actual !== expected) {
@@ -109,4 +109,19 @@ assertEqual(isDisplayMath(displayTarget({ explicit: true })), true, "explicit di
 assertEqual(isDisplayMath(displayTarget({ remainingText: "" })), true, "formula-only container classification");
 assertEqual(isDisplayMath(displayTarget({ remainingText: "prefix formula suffix" })), false, "mixed prose classification");
 
-console.log("MathML recovery passed for 4 formulas and 4 display-mode cases.");
+const attributeSource = {
+  querySelector: () => null,
+  matches: () => false,
+  getAttribute: (name) => name === "data-latex" ? "\\[X \\in \\mathbb{R}^{d}\\]" : null
+};
+assertEqual(texFrom(attributeSource), "X \\in \\mathbb{R}^{d}", "data-latex delimiter cleanup");
+
+const hiddenSource = { textContent: "\\(X_c \\in \\mathbb{R}^{H \\times W}\\)" };
+const hiddenSourceRoot = {
+  querySelector: (selector) => selector.includes(".sr-only") ? hiddenSource : null,
+  matches: () => false,
+  getAttribute: () => null
+};
+assertEqual(texFrom(hiddenSourceRoot), "X_c \\in \\mathbb{R}^{H \\times W}", "hidden TeX source recovery");
+
+console.log("Math recovery passed for 4 formulas, 4 display modes, and 2 hidden/source attribute cases.");

@@ -1,6 +1,49 @@
 (function (namespace) {
   "use strict";
 
+  const MATH_WRAPPER_SELECTOR = [
+    ".katex",
+    ".katex-display",
+    ".math-inline",
+    ".math-display",
+    ".MathJax",
+    ".MathJax_Display",
+    "mjx-container",
+    "math",
+    "[data-tex]",
+    "[data-latex]",
+    "[data-math]"
+  ].join(", ");
+
+  const SOURCE_ATTRIBUTES = ["data-tex", "data-latex", "data-math"];
+
+  function cleanTexSource(value) {
+    let source = (value || "").trim();
+    const delimiters = [
+      [/^\\\[([\s\S]*)\\\]$/u, "$1"],
+      [/^\\\(([\s\S]*)\\\)$/u, "$1"],
+      [/^\$\$([\s\S]*)\$\$$/u, "$1"],
+      [/^\$([^$]*)\$$/u, "$1"]
+    ];
+    for (const [pattern, replacement] of delimiters) {
+      if (pattern.test(source)) return source.replace(pattern, replacement).trim();
+    }
+    return source;
+  }
+
+  function looksLikeTexSource(value) {
+    const source = cleanTexSource(value);
+    return Boolean(source && (/\\[A-Za-z]+|[_^][{(]?[A-Za-z0-9]|[∈∉×÷±∑∏∫√∞≤≥≠≈]/u.test(source)));
+  }
+
+  function sourceAttributeTex(element) {
+    for (const attribute of SOURCE_ATTRIBUTES) {
+      const value = element?.getAttribute?.(attribute);
+      if (value && !/^\s*(math|formula)\s*$/i.test(value)) return cleanTexSource(value);
+    }
+    return null;
+  }
+
   function childTex(element) {
     return Array.from(element.childNodes).map(mathMLToTex).join("");
   }
@@ -84,20 +127,31 @@
   }
 
   function texFrom(element) {
-    const annotation = element.querySelector("annotation[encoding='application/x-tex'], annotation[encoding='text/x-tex']");
-    if (annotation && annotation.textContent.trim()) return annotation.textContent.trim();
+    const annotation = element.querySelector?.("annotation[encoding='application/x-tex'], annotation[encoding='text/x-tex'], annotation[encoding*='tex' i]");
+    if (annotation && annotation.textContent.trim()) return cleanTexSource(annotation.textContent);
 
-    for (const attribute of ["data-tex", "data-latex", "data-math"]) {
-      const value = element.getAttribute && element.getAttribute(attribute);
-      if (value && value.trim() && !/^\s*(math|formula)\s*$/i.test(value)) return value.trim();
-    }
+    const directSource = sourceAttributeTex(element);
+    if (directSource) return directSource;
+
+    const sourcedDescendant = element.querySelector?.("[data-tex], [data-latex], [data-math]");
+    const descendantSource = sourceAttributeTex(sourcedDescendant);
+    if (descendantSource) return descendantSource;
 
     const math = element.matches?.("math") ? element : element.querySelector?.("math");
     const mathMLTex = math ? mathMLToTex(math).replace(/\s{2,}/g, " ").trim() : "";
     if (mathMLTex) return mathMLTex;
 
-    const ariaLabel = element.getAttribute && element.getAttribute("aria-label");
-    if (ariaLabel && ariaLabel.trim() && !/^\s*(math|formula)\s*$/i.test(ariaLabel)) return ariaLabel.trim();
+    const ariaSource = [element, element.querySelector?.("[aria-label]")]
+      .map((candidate) => candidate?.getAttribute?.("aria-label"))
+      .find(looksLikeTexSource);
+    if (ariaSource) return cleanTexSource(ariaSource);
+
+    const hiddenSource = element.querySelector?.(".sr-only, .visually-hidden, mjx-assistive-mml, [data-math-source]");
+    if (hiddenSource && looksLikeTexSource(hiddenSource.textContent)) return cleanTexSource(hiddenSource.textContent);
+
+    if (element.matches?.(MATH_WRAPPER_SELECTOR) && looksLikeTexSource(element.textContent)) {
+      return cleanTexSource(element.textContent);
+    }
     return null;
   }
 
@@ -116,9 +170,9 @@
   }
 
   function mathInfo(element) {
-    const katex = element.matches && element.matches(".katex, .katex-display")
+    const katex = element.matches && element.matches(MATH_WRAPPER_SELECTOR)
       ? element
-      : element.closest && element.closest(".katex, .katex-display");
+      : element.closest && element.closest(MATH_WRAPPER_SELECTOR);
     const target = katex || element;
     const tex = texFrom(target);
     if (!tex) return null;
@@ -128,8 +182,53 @@
 
   function isMathElement(element) {
     if (!element.matches) return false;
-    if (element.matches(".katex, .katex-display")) return true;
-    return element.matches("math") && Boolean(texFrom(element));
+    return element.matches(MATH_WRAPPER_SELECTOR) && Boolean(texFrom(element));
+  }
+
+  function createDebugReport(root) {
+    const selector = [
+      MATH_WRAPPER_SELECTOR,
+      "[class*='katex' i]",
+      "[class*='formula' i]",
+      "[class*='tex' i]",
+      "[aria-label*='math' i]",
+      "[aria-label*='latex' i]"
+    ].join(", ");
+    const candidates = Array.from(root.querySelectorAll(selector));
+    const signal = /[∈∉×÷±∑∏∫√∞≤≥≠≈]|\\(?:mathbb|text|boxed|times|in)\b/u;
+    const leaves = Array.from(root.querySelectorAll("span, div"))
+      .filter((element) => signal.test(element.textContent) && !Array.from(element.children).some((child) => signal.test(child.textContent)));
+    const nodes = [...new Set([...candidates, ...leaves, ...leaves.map((element) => element.parentElement).filter(Boolean)])].slice(0, 24);
+    const version = globalThis.chrome?.runtime?.getManifest?.().version || "unknown";
+    const report = {
+      gptcopierVersion: version,
+      hostname: window.location.hostname,
+      contentRoot: { tag: root.tagName, class: String(root.className || "").slice(0, 300) },
+      candidateCount: nodes.length,
+      candidates: nodes.map((element, index) => {
+        let recovered = null;
+        let display = null;
+        try {
+          recovered = texFrom(element);
+          display = recovered ? isDisplayMath(element) : null;
+        } catch (error) {
+          recovered = `ERROR: ${error.message}`;
+        }
+        return {
+          index,
+          tag: element.tagName,
+          class: String(element.className || "").slice(0, 500),
+          attributes: Object.fromEntries(Array.from(element.attributes || [])
+            .filter((attribute) => /^(?:data-|aria-|encoding$|display$|mathvariant$|notation$|style$|role$|class$)/i.test(attribute.name))
+            .map((attribute) => [attribute.name, attribute.value.slice(0, 1000)])),
+          recovered,
+          display,
+          text: element.textContent.trim().slice(0, 1000),
+          html: element.outerHTML.slice(0, 5000)
+        };
+      })
+    };
+    return `GPTCopier Math Debug (user-copied; nothing was sent automatically)\n${JSON.stringify(report, null, 2)}`;
   }
 
   function renderMath(info) {
@@ -204,6 +303,8 @@
     isStandaloneFormula,
     isDisplayMath,
     mathMLToTex,
-    normaliseFallbackTex
+    normaliseFallbackTex,
+    texFrom,
+    createDebugReport
   };
 }(window.GPTCopier));

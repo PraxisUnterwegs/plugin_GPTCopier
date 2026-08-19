@@ -28,6 +28,8 @@ npm test
 
 本次离线验证录制的演示视频为 [`demo/GPTCopier-offline-demo.mp4`](demo/GPTCopier-offline-demo.mp4)。
 
+公式仍有兼容问题时，可点击回答操作区的 `Math Debug`。它只把当前回答中疑似公式节点的标签、属性和截断 HTML 写入剪贴板，不读取 Cookie，也不会自动发送任何数据；将结果手动提供给开发者即可针对真实 DOM 适配。
+
 ## 架构
 
 - `src/sites/adapters.js`：站点匹配、消息角色、内容与操作区发现。

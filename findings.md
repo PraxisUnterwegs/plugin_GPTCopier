@@ -11,6 +11,7 @@
 - 项目目录初始为空，尚未存在用户代码或 Git 历史。
 - 用户明确指定 Manifest V3，Chrome/Edge 均使用 Chromium 扩展接口，能共享一份包。
 - 为避免访问真实 AI 账户，测试采用本地 HTTP 夹具，并复刻消息角色、Markdown、KaTeX、操作栏及动态页面所需的语义 DOM。
+- 用户截图确认 Edge 扩展已启用且显示版本 `0.2.0`，因此失败并非扩展未重载，而是线上公式 DOM 与夹具仍不一致。
 
 ## 技术决策
 | 决策 | 理由 |
@@ -23,6 +24,7 @@
 | 文本容器一致处理 | 公式可能不在 `<p>` 内；`div`、列表以及根文本节点都必须应用同一个回退规则。 |
 | 公式显示模式 | `.katex-display`、`MathJax_Display`、`data-display='block'` 等显式标志判断为块级；仅含公式的段落/块容器作为结构回退。 |
 | MathML 结构恢复 | 用户样例中的 `RC×H×W` 源于 MathML 被当作视觉文本展开；需读取 `msup`、`msub`、`mathvariant=double-struck`、`mtext` 与 `menclose`。 |
+| 公式源发现扩展 | 除 annotation/MathML 外，还需检查后代 `data-tex/data-latex/data-math`、aria label、screen-reader hidden source 与 MathJax 容器。 |
 
 ## 遇到的问题
 | 问题 | 解决方案 |
@@ -38,4 +40,4 @@
 - 需求原文：`/Users/jzf/.codex/attachments/034c5dc6-68aa-4f01-a58d-333f69987ade/pasted-text.txt`
 
 ## 视觉/浏览器发现
-- 离线夹具已通过 10 项检查。点击 `Copy Q&A MD` 后显示 `Copied!` 并展示生成的 Q&A Markdown；该验证没有访问任何线上账户。
+- 离线夹具已通过既有检查；用户提供的 Edge 扩展页截图清楚显示 GPTCopier 已启用、版本为 `0.2.0`，检查视图显示“无活动视图”。
