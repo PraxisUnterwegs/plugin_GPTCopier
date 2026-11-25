@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "GPTCopier — Paste & Convert",
-  "version": "0.3.0",
-  "description": "Convert manually pasted AI responses into math-ready Markdown, entirely on device.",
+  "version": "0.4.0",
+  "description": "Convert manually pasted AI responses into math- and table-ready Markdown, entirely on device.",
   "permissions": ["clipboardWrite"],
   "action": {
     "default_title": "Open GPTCopier Paste & Convert"

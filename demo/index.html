@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>GPTCopier 0.3.0 — Offline Demo</title>
+    <title>GPTCopier 0.4.0 — Offline Demo</title>
     <link rel="stylesheet" href="../src/converter/styles.css">
   </head>
   <body>
@@ -20,14 +20,14 @@
         <div class="section-heading">
           <div>
             <label id="input-label" for="source-input">Native copied text</label>
-            <p>Paste or edit text below. Only formula delimiters are normalized.</p>
+            <p>Paste or edit text below. Formula delimiters and tab-separated tables are normalized locally.</p>
           </div>
           <button id="clear-input" class="button button--quiet" type="button" disabled>Clear</button>
         </div>
         <textarea id="source-input" spellcheck="false" placeholder="Paste the response here…" aria-describedby="conversion-status conversion-warnings"></textarea>
         <div class="result-bar">
           <div class="result-copy">
-            <strong id="conversion-status" aria-live="polite">Converted 0 formulas (0 block / 0 inline)</strong>
+            <strong id="conversion-status" aria-live="polite">Converted 0 formulas (0 block / 0 inline) · 0 tables</strong>
             <span>Code spans, code fences, and existing $ math stay unchanged.</span>
           </div>
           <button id="copy-output" class="button button--primary" type="button" disabled>Copy converted Markdown</button>

@@ -6,7 +6,7 @@ const manifest = JSON.parse(await readFile("manifest.json", "utf8"));
 const packageJson = JSON.parse(await readFile("package.json", "utf8"));
 
 assert.equal(manifest.manifest_version, 3);
-assert.equal(manifest.version, "0.3.0");
+assert.equal(manifest.version, "0.4.0");
 assert.equal(packageJson.version, manifest.version);
 assert.deepEqual(manifest.permissions, ["clipboardWrite"]);
 assert.equal("content_scripts" in manifest, false);

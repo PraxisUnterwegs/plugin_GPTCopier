@@ -7,7 +7,7 @@
   const status = document.querySelector("#conversion-status");
   const warnings = document.querySelector("#conversion-warnings");
   const version = document.querySelector("#version");
-  let currentResult = { output: "", stats: { total: 0, block: 0, inline: 0 }, warnings: [] };
+  let currentResult = { output: "", stats: { total: 0, block: 0, inline: 0, tables: 0 }, warnings: [] };
   let feedbackTimer = null;
 
   try {
@@ -18,8 +18,8 @@
 
   function render() {
     currentResult = GPTCopierConverter.convertNativeCopy(input.value);
-    const { total, block, inline } = currentResult.stats;
-    status.textContent = `Converted ${total} formula${total === 1 ? "" : "s"} (${block} block / ${inline} inline)`;
+    const { total, block, inline, tables } = currentResult.stats;
+    status.textContent = `Converted ${total} formula${total === 1 ? "" : "s"} (${block} block / ${inline} inline) · ${tables} table${tables === 1 ? "" : "s"}`;
     warnings.replaceChildren(...currentResult.warnings.map((message) => {
       const item = document.createElement("li");
       item.textContent = message;

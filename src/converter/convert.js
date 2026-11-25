@@ -131,9 +131,125 @@
     });
   }
 
+  const SEPARATOR_CELL = /^:?-{3,}:?$/u;
+
+  function escapeTablePipes(cell) {
+    return cell.replace(/(\\*)\|/g, (match, slashes) => (
+      slashes.length % 2 === 1 ? match : `${slashes}\\|`
+    ));
+  }
+
+  function formatTableCell(rawCell, protector) {
+    let cell = protector.restore(rawCell).trim();
+    if (!cell) return "";
+    cell = cell.replace(/\$\$\s*\r?\n([\s\S]*?)\r?\n\s*\$\$/g, (_match, body) => {
+      const compact = body.replace(/\s*\r?\n\s*/g, " ").trim();
+      return compact ? `$${compact}$` : "";
+    });
+    cell = cell.replace(/\r?\n+/g, "<br>");
+    return escapeTablePipes(cell);
+  }
+
+  function isPipeTableLine(line) {
+    return /^\s*\|.*\|\s*$/u.test(line);
+  }
+
+  function isTabTableHeader(line) {
+    if (!line.includes("\t") || isPipeTableLine(line)) return false;
+    const trimmed = line.trim();
+    return trimmed.length > 0 && trimmed.includes("\t");
+  }
+
+  function isTabTableRow(line) {
+    if (!line.includes("\t") || isPipeTableLine(line)) return false;
+    const trimmed = line.trim();
+    if (!trimmed) return false;
+    const withoutLeadingTabs = line.replace(/^\t+/u, "");
+    if (!withoutLeadingTabs.includes("\t") && /^(?:[-*+]|\d+[.)])\s+/u.test(withoutLeadingTabs)) {
+      return false;
+    }
+    return true;
+  }
+
+  function isSeparatorRow(cells) {
+    let hasSeparator = false;
+    for (const cell of cells) {
+      const trimmed = cell.trim();
+      if (!trimmed) continue;
+      if (!SEPARATOR_CELL.test(trimmed)) return false;
+      hasSeparator = true;
+    }
+    return hasSeparator;
+  }
+
+  function buildMarkdownTable(rawRows, newline, protector) {
+    const splitRows = rawRows.map((line) => line.split("\t"));
+    const colCount = splitRows.reduce((max, row) => Math.max(max, row.length), 0);
+    const padRow = (row) => {
+      const padded = row.slice();
+      while (padded.length < colCount) padded.push("");
+      return padded;
+    };
+
+    const headerCells = padRow(splitRows[0]).map((cell) => formatTableCell(cell, protector));
+    let separatorCells = Array(colCount).fill("---");
+    let bodyStartIndex = 1;
+
+    if (splitRows.length >= 2 && isSeparatorRow(splitRows[1])) {
+      separatorCells = padRow(splitRows[1]).map((cell) => {
+        const trimmed = cell.trim();
+        return SEPARATOR_CELL.test(trimmed) ? trimmed : "---";
+      });
+      bodyStartIndex = 2;
+    }
+
+    const lines = [
+      `| ${headerCells.join(" | ")} |`,
+      `| ${separatorCells.join(" | ")} |`
+    ];
+
+    for (let index = bodyStartIndex; index < splitRows.length; index += 1) {
+      const cells = padRow(splitRows[index]).map((cell) => formatTableCell(cell, protector));
+      lines.push(`| ${cells.join(" | ")} |`);
+    }
+
+    return lines.join(newline);
+  }
+
+  function convertTabTables(value, stats, protector) {
+    if (!value.includes("\t")) return value;
+    const newline = value.includes("\r\n") ? "\r\n" : "\n";
+    const lines = value.split(/\r?\n/);
+    const output = [];
+
+    for (let index = 0; index < lines.length; index += 1) {
+      if (!isTabTableHeader(lines[index])) {
+        output.push(lines[index]);
+        continue;
+      }
+
+      let end = index + 1;
+      while (end < lines.length && isTabTableRow(lines[end])) {
+        end += 1;
+      }
+
+      if (end - index < 2) {
+        output.push(lines[index]);
+        continue;
+      }
+
+      const tableBlock = buildMarkdownTable(lines.slice(index, end), newline, protector);
+      output.push(protector.protect(tableBlock));
+      stats.tables += 1;
+      index = end - 1;
+    }
+
+    return output.join(newline);
+  }
+
   function convertNativeCopy(input) {
     const source = String(input ?? "");
-    const stats = { total: 0, block: 0, inline: 0 };
+    const stats = { total: 0, block: 0, inline: 0, tables: 0 };
     const warnings = [];
     if (!source) return { output: "", stats, warnings };
 
@@ -142,6 +258,7 @@
     output = convertExplicitDelimiters(output, stats, warnings, protector);
     output = convertBareDisplayBlocks(output, stats, warnings, protector);
     output = convertInlineParentheses(output, stats, protector);
+    output = convertTabTables(output, stats, protector);
     output = protector.restore(output);
     stats.total = stats.block + stats.inline;
     return { output, stats, warnings };

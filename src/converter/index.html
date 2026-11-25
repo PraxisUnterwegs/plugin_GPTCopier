@@ -13,7 +13,7 @@
         <div>
           <div class="eyebrow">GPTCOPIER <span id="version"></span></div>
           <h1>Paste &amp; Convert</h1>
-          <p>Paste a response copied with the AI website’s own copy button. Formula delimiters are normalized locally into Markdown.</p>
+          <p>Paste a response copied with the AI website’s own copy button. Formula delimiters and tab-separated tables are normalized locally into Markdown.</p>
         </div>
       </header>
 
@@ -28,7 +28,7 @@
         <textarea id="source-input" spellcheck="false" placeholder="Paste the response here…" aria-describedby="conversion-status conversion-warnings"></textarea>
         <div class="result-bar">
           <div class="result-copy">
-            <strong id="conversion-status" aria-live="polite">Converted 0 formulas (0 block / 0 inline)</strong>
+            <strong id="conversion-status" aria-live="polite">Converted 0 formulas (0 block / 0 inline) · 0 tables</strong>
             <span>Code spans, code fences, and existing $ math stay unchanged.</span>
           </div>
           <button id="copy-output" class="button button--primary" type="button" disabled>Copy converted Markdown</button>
